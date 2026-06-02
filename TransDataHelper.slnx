@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../TransDataHelperTester/TransDataHelperTester.csproj" />
+  <Project Path="TransDataHelper.csproj" />
+</Solution>
