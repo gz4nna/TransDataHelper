@@ -8,12 +8,12 @@ public class GlobalConfig
 {
     private static readonly Lock _lock = new();
 
-    private static Options _current = new();
+    private static DatabaseOptions _current = new();
 
     /// <summary>
     /// 获取或设置当前的全局默认配置。
     /// </summary>
-    public static Options Current
+    public static DatabaseOptions Current
     {
         get => _current;
         set
@@ -38,7 +38,7 @@ public class GlobalConfig
     /// });
     /// </summary>
     /// <param name="configure">配置修改委托</param>
-    public static void Configure(Action<Options> configure)
+    public static void Configure(Action<DatabaseOptions> configure)
     {
         if (configure == null) throw new ArgumentNullException(nameof(configure));
 
@@ -55,7 +55,7 @@ public class GlobalConfig
     {
         lock (_lock)
         {
-            _current = new Options();
+            _current = new DatabaseOptions();
         }
     }
 }

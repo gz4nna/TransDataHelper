@@ -8,12 +8,8 @@ namespace TransDataHelper.Adapters;
 /// <summary>
 /// SQLite 适配器实现
 /// </summary>
-public class SqliteAdapter : DatabaseAdapter
+public class SqliteAdapter(SqliteConnectionConfig config) : DatabaseAdapter(config)
 {
-    public SqliteAdapter(SqliteConnectionConfig config) : base(config)
-    {
-    }
-
     protected override IDbConnection CreateConnection()
     {
         return new SqliteConnection(_config.ConnectionString);
@@ -27,6 +23,7 @@ public class SqliteAdapter : DatabaseAdapter
         return cmd.ExecuteNonQuery();
     }
 
+    // 由于连接被持续持有,因此在 SQLiteConnection 彻底关闭文件句柄前应该都会出于锁定而导致无法删除db文件
     public override IDataReader ExecuteReader(string sql, params DbParameter[] parameters)
     {
         if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentNullException(nameof(sql));
@@ -37,7 +34,9 @@ public class SqliteAdapter : DatabaseAdapter
         var cmd = BuildCommand(sql, parameters);
         // CommandBehavior.CloseConnection 会在 Reader 关闭时自动关闭连接吗？
         // 在我们的设计里，Connection 是由 Adapter 管理的，这里我们不完全依赖这个行为，由 Adapter 统一管理生命周期
-        return cmd.ExecuteReader(CommandBehavior.Default);
+        // return cmd.ExecuteReader(CommandBehavior.Default);
+        // 改为依赖该行为，确保连接被及时关闭
+        return cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
 
     private SqliteCommand BuildCommand(string sql, DbParameter[] parameters)
