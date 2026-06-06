@@ -2,7 +2,6 @@
 
 /// <summary>
 /// MySQL 数据库连接配置
-/// 需 NuGet 包: MySql.Data
 /// </summary>
 public class MySqlConnectionConfig : DatabaseConnectionConfig
 {
