@@ -9,10 +9,16 @@ public class MySqlConnectionConfig : DatabaseConnectionConfig
     public MySqlConnectionConfig()
     {
         Port = "3306"; // MySQL 默认端口
+        Charset = "utf8mb4";
     }
 
     public string ConnectionTimeout { get; set; } = "10";
     public string CommandTimeout { get; set; } = "30";
+
+    /// <summary>
+    /// 字符集设置。默认 utf8mb4，若读取老库乱码请改为 gbk
+    /// </summary>
+    public string Charset { get; set; }
 
     public override string ConnectionString
     {
@@ -30,7 +36,7 @@ public class MySqlConnectionConfig : DatabaseConnectionConfig
                 Pwd='{Password}';
                 Connection Timeout={ConnectionTimeout};
                 Default Command Timeout={CommandTimeout};
-                Charset=gbk;"; // 【备忘录.2】解决中文乱码坑
+                Charset={Charset};"; // 【备忘录.2】解决中文乱码坑
 
             return connStr.Replace("\r\n", "").Trim(); // 清理换行符和多余空格
         }
