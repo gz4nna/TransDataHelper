@@ -23,6 +23,11 @@ public class DatabaseOptions
     /// </summary>
     public SybaseConnectionConfig Sybase { get; set; }
 
+    /// <summary>
+    /// SQL Server 连接配置
+    /// </summary>
+    public SqlServerConnectionConfig SqlServer { get; set; }
+
     private int _batchSize = 500;
 
     /// <summary>
@@ -64,5 +69,6 @@ public class DatabaseOptions
         MySql = new MySqlConnectionConfig();
         Oracle = new OracleConnectionConfig();
         Sybase = new SybaseConnectionConfig();
+        SqlServer = new SqlServerConnectionConfig();
     }
 }

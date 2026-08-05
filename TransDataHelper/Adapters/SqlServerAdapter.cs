@@ -1,24 +1,23 @@
-﻿using MySqlConnector;
 using System.Data;
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using TransDataHelper.Config.Connection;
 
 namespace TransDataHelper.Adapters;
 
 /// <summary>
-/// MySQL 数据库适配器
-/// MariaDb 也适用
+/// SQL Server 数据库适配器
 /// </summary>
-public class MySqlAdapter : DatabaseAdapter
+public class SqlServerAdapter : DatabaseAdapter
 {
-    public MySqlAdapter(MySqlConnectionConfig config) : base(config)
+    public SqlServerAdapter(SqlServerConnectionConfig config) : base(config)
     {
     }
 
     protected override IDbConnection CreateConnection()
     {
         // 直接使用 Config 生成好的连接字符串
-        return new MySqlConnection(_config.ConnectionString);
+        return new SqlConnection(_config.ConnectionString);
     }
 
     public override int ExecuteNonQuery(string sql, params DbParameter[] parameters)
@@ -38,9 +37,9 @@ public class MySqlAdapter : DatabaseAdapter
         return cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
 
-    private MySqlCommand BuildCommand(string sql, DbParameter[] parameters)
+    private SqlCommand BuildCommand(string sql, DbParameter[] parameters)
     {
-        var cmd = (MySqlCommand)Connection.CreateCommand();
+        var cmd = (SqlCommand)Connection.CreateCommand();
         cmd.CommandText = sql;
 
         if (parameters != null && parameters.Length > 0)
