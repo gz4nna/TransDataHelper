@@ -53,11 +53,52 @@ public class SybaseAdapter : DatabaseAdapter
         return cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
 
-    private AseCommand BuildCommand(string sql, int timeout)
+    /// <summary>
+    /// 在单个事务内批量执行多条纯文本 SQL 语句。
+    /// 由于 Sybase 不支持多行 VALUES 与 ASE 驱动不支持分号分隔的多语句一次执行，
+    /// 故在事务内逐条执行，降低多次自动提交开销，并保证整批原子性。
+    /// 全部成功则提交，任一失败则回滚。
+    /// </summary>
+    /// <param name="sqls">同一事务内按顺序执行的 SQL 语句列表</param>
+    /// <param name="commandTimeout">单条命令的超时时间（秒），默认 120</param>
+    public void ExecuteBatchInTransaction(List<string> sqls, int commandTimeout = 120)
+    {
+        ArgumentNullException.ThrowIfNull(sqls);
+        if (sqls.Count == 0) return;
+
+        var conn = (AseConnection)Connection;
+        using var tx = conn.BeginTransaction();
+
+        try
+        {
+            for (int i = 0; i < sqls.Count; i++)
+            {
+                var sql = sqls[i];
+                if (string.IsNullOrWhiteSpace(sql))
+                    throw new ArgumentException($"批量语句中第 {i + 1} 条为空白，无法执行喵。", nameof(sqls));
+
+                using var cmd = BuildCommand(sql, commandTimeout, tx);
+                cmd.ExecuteNonQuery();
+            }
+
+            tx.Commit();
+        }
+        catch
+        {
+            tx.Rollback();
+            throw;
+        }
+    }
+
+    private AseCommand BuildCommand(string sql, int timeout, AseTransaction? tx = null)
     {
         var cmd = (AseCommand)Connection.CreateCommand();
         cmd.CommandText = sql;
         cmd.CommandTimeout = timeout; // 操作超时参考
+        if (tx != null)
+        {
+            cmd.Transaction = tx; // 将命令绑定到指定事务
+        }
         return cmd;
     }
 }
