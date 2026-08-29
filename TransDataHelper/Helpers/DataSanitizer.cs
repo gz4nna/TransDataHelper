@@ -72,4 +72,19 @@ public static class DataSanitizer
         // 按生产环境验证的 GB2312 编码手动解码
         return Encoding.GetEncoding("GB2312").GetString(rawBytes);
     }
+
+    /// <summary>
+    /// 将字符串转换为Hex表示,绕过驱动转码，适用于 Sybase INSERT 语句中直接插入中文
+    /// </summary>
+    /// <param name="rawString">utf-16 编码的字符串</param>
+    /// <returns>十六进制字符串</returns>
+    public static string InsertSybaseHex(string rawString)
+    {
+        if (string.IsNullOrEmpty(rawString)) return rawString;
+
+        EnsureEncodingRegistered();
+        byte[] bytes = Encoding.GetEncoding("GB2312").GetBytes(rawString);
+        string hexStr = "0x" + BitConverter.ToString(bytes).Replace("-", "");
+        return hexStr;
+    }
 }
