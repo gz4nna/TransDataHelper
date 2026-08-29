@@ -13,6 +13,13 @@ public class SqlServerConnectionConfig : DatabaseConnectionConfig
 
     public string ConnectionTimeout { get; set; } = "15";
     public string TrustServerCertificate { get; set; } = "True";
+    /// <summary>
+    /// 是否启用 TLS 加密。
+    /// 默认 False：内网无隔离场景下与老版本 SQL Server（仅支持 TLS 1.0）直连，
+    /// 避免强制加密导致的 TLS 1.0 协商警告与握手失败。
+    /// 若目标库确实需要加密，可在插件前端参数中改为 True（SqlServerEncrypt）。
+    /// </summary>
+    public string Encrypt { get; set; } = "False";
 
     public override string ConnectionString
     {
@@ -35,6 +42,7 @@ public class SqlServerConnectionConfig : DatabaseConnectionConfig
                 User Id='{User}';
                 Password='{Password}';
                 Connection Timeout={ConnectionTimeout};
+                Encrypt={Encrypt};
                 TrustServerCertificate={TrustServerCertificate};";
 
             return connStr.Replace("\r\n", "").Trim();
